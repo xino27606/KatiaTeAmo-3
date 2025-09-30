@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Te amo❤️</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      overflow: hidden;
+    }
+    #contenedor {
+      max-width: 600px;
+      position: relative;
+    }
+    h1 {
+      font-size: 2em;
+      color: #d63384;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px black;
+    }
+    .opciones button {
+      padding: 15px 25px;
+      margin: 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2em;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      position: relative;
+      text-shadow: 1px 1px 2px black;
+    }
+    .correcta {
+      background-color: #28a745;
+      color: white;
+    }
+    .incorrecta {
+      background-color: #dc3545;
+      color: white;
+    }
+    .confetti {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      pointer-events: none;
+      animation: caer 3s linear infinite;
+    }
+    @keyframes caer {
+      0% { transform: translateY(-50px) rotate(0deg); }
+      100% { transform: translateY(600px) rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="contenedor">
+    <h1 id="pregunta">Te amo mucho mi negrita bella, ¿tú me amas?</h1>
+    <div class="opciones">
+      <button class="correcta" onclick="primeraCorrecta()">Yo también te amo</button>
+      <button class="incorrecta" onclick="primerClickIncorrecta(1)">No te amo</button>
+    </div>
+  </div>
+
+  <audio id="bien" src="https://www.soundjay.com/buttons/sounds/button-3.mp3" volume="0.95"></audio>
+  <audio id="mal" src="https://www.soundjay.com/buttons/sounds/button-10.mp3" volume="0.95"></audio>
+  <audio id="acustico" src="https://www.dropbox.com/s/sample/acoustic-take-on-me.mp3?dl=1" preload="auto" volume="0.95"></audio>
+
+  <script>
+    let contadorIncorrecta1 = 0;
+    let contadorIncorrecta2 = 0;
+    let clickPrimerIncorrecta1 = false;
+    let clickPrimerIncorrecta2 = false;
+
+    function achicar(btn, pregunta) {
+      let size = parseFloat(window.getComputedStyle(btn).fontSize);
+      if (size > 1) {
+        btn.style.fontSize = (size - (pregunta===2?5:3)) + "px";
+        btn.style.padding = "3px";
+      }
+    }
+
+    function mover(btn, pregunta) {
+      const contenedor = document.getElementById("contenedor");
+      const maxX = contenedor.clientWidth - btn.offsetWidth;
+      const maxY = contenedor.clientHeight - btn.offsetHeight;
+      const factor = pregunta===2?0.15:0.4; // más rápido en la segunda pregunta
+      const x = Math.random() * maxX * factor;
+      const y = Math.random() * maxY * factor;
+      btn.style.position = "absolute";
+      btn.style.left = x + "px";
+      btn.style.top = y + "px";
+    }
+
+    function escapar(btn, pregunta) {
+      const rect = btn.getBoundingClientRect();
+      const mouseX = event.clientX;
+      const mouseY = event.clientY;
+      const dx = rect.left + rect.width/2 - mouseX;
+      const dy = rect.top + rect.height/2 - mouseY;
+      if(Math.abs(dx)<100 && Math.abs(dy)<100){
+        mover(btn,pregunta);
+      }
+    }
+
+    function primerClickIncorrecta(pregunta){
+      if(pregunta===1 && !clickPrimerIncorrecta1){
+        const btn = event.target;
+        btn.onmousemove = (e)=>escapar(btn,1);
+        clickPrimerIncorrecta1 = true;
+      }
+      if(pregunta===2 && !clickPrimerIncorrecta2){
+        const btn = event.target;
+        btn.onmousemove = (e)=>escapar(btn,2);
+        clickPrimerIncorrecta2 = true;
+      }
+      travesura(event.target, pregunta);
+    }
+
+    function travesura(btn, pregunta) {
+      achicar(btn, pregunta);
+      mover(btn, pregunta);
+      document.getElementById('mal').play();
+      if (pregunta===1) contadorIncorrecta1++;
+      if (pregunta===2) contadorIncorrecta2++;
+
+      if (contadorIncorrecta1 > 30 || contadorIncorrecta2 > 30){
+        document.getElementById('pregunta').innerText = "Soy fome watona :,c";
+        document.querySelector('.opciones').innerHTML = '';
+      }
+    }
+
+    function crearConfetti() {
+      const confetti = document.createElement('div');
+      confetti.classList.add('confetti');
+      confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+      confetti.style.left = Math.random() * window.innerWidth + 'px';
+      document.body.appendChild(confetti);
+      setTimeout(() => confetti.remove(), 3000);
+    }
+
+    function mostrarConfettiTemporal() {
+      const bien = document.getElementById('bien');
+      bien.volume = 0.95;
+      bien.play().catch(()=>{});
+      for (let i = 0; i < 50; i++) {
+        setTimeout(crearConfetti, i * 50);
+      }
+    }
+
+    function mostrarConfettiInfinito() {
+      const bien = document.getElementById('bien');
+      bien.volume = 0.95;
+      bien.play().catch(()=>{});
+      const acustico = document.getElementById('acustico');
+      acustico.volume = 0.95;
+      acustico.currentTime = 0;
+      acustico.play().catch(()=>{});
+      setInterval(crearConfetti, 200);
+    }
+
+    function primeraCorrecta() {
+      mostrarConfettiTemporal();
+      document.getElementById("pregunta").innerText = "¿Te gustaría casarte conmigo?";
+      document.querySelector(".opciones").innerHTML = `
+        <button class="correcta" onclick="segundaCorrecta()">Sí quiero casarme contigo mi chanchito</button>
+        <button class="incorrecta" onclick="primerClickIncorrecta(2)">No quiero casarme con vo</button>
+      `;
+    }
+
+    function segundaCorrecta() {
+      document.getElementById("contenedor").innerHTML = "<h1>Uy si te amo mucho, ¡vamos a casarnos!!! ❤️</h1>";
+      mostrarConfettiInfinito();
+    }
+  </script>
+</body>
+</html>
